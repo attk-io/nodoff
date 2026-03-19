@@ -1,6 +1,15 @@
 # Phase 2: Type Definitions
 
+**Status: Complete**
+
 **Goal:** Define all shared types before implementation (type-first approach).
+
+## Decisions
+
+- **TimerPreset** — moved out of `types/`; it's a UI concern and will be defined as a const array in the popup code (Phase 5)
+- **Message union** — flat discriminated union; no split by direction
+- **Responses** — `TimerStateResponse` included alongside request types in the union
+- **Storage key convention** — `Record<string, TimerState>` with tabId coerced to string (standard JSON key behavior, no branded type needed)
 
 ## Files
 
@@ -8,7 +17,6 @@
 
 - `TimerStatus` — `"idle" | "active" | "expired"`
 - `TimerState` — `{ tabId: number; url: string; status: TimerStatus; durationMs: number; expiresAt: number; createdAt: number }`
-- `TimerPreset` — `{ label: string; durationMs: number }`
 
 ### `types/messages.ts` — Message passing (discriminated union)
 
@@ -23,6 +31,10 @@
 
 - `SessionStorageSchema` — `{ timers: Record<string, TimerState>; lastTimerTabId: number | null }`
 
+### `types/index.ts` — Barrel export
+
+Re-exports all types from a single entry point.
+
 ## Verification
 
-`bun run build` succeeds with no type errors.
+`bun run build` and `bun run type-check` succeed with no type errors.

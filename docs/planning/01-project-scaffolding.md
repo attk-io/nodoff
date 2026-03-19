@@ -1,5 +1,7 @@
 # Phase 1: Project Scaffolding
 
+**Status: Complete**
+
 **Goal:** Buildable extension skeleton that loads in Chrome with an empty popup.
 
 ## Key Decisions
