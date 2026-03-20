@@ -1,1 +1,101 @@
 @import "tailwindcss";
+
+body {
+  background-color: var(--color-midnight);
+}
+
+/* ── Dreamy Palette (OKLCH) ── */
+/* Dark mode is the default registered in @theme.
+   Light mode overrides those same custom properties below. */
+@theme {
+  --color-midnight: oklch(12% 0.03 270);
+  --color-surface: oklch(18% 0.035 270);
+  --color-surface-hover: oklch(22% 0.04 270);
+  --color-surface-active: oklch(26% 0.04 270);
+
+  --color-cream: oklch(96% 0.015 80);
+  --color-cream-muted: oklch(80% 0.025 80);
+
+  --color-lavender: oklch(72% 0.11 280);
+  --color-lavender-soft: oklch(78% 0.08 280);
+  --color-lavender-glow: oklch(65% 0.15 280);
+  --color-lavender-dim: oklch(55% 0.06 280);
+
+  --color-rose: oklch(70% 0.1 350);
+  --color-rose-hover: oklch(75% 0.12 350);
+  --color-rose-active: oklch(65% 0.1 350);
+
+  --color-cancel: oklch(65% 0.12 25);
+  --color-cancel-hover: oklch(70% 0.14 25);
+
+  /* Easing */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Animation */
+  --animate-fade-up: fade-up 500ms var(--ease-out-quart) both;
+  --animate-fade-in: fade-in 400ms var(--ease-out-quart) both;
+  --animate-breathe: breathe 4s ease-in-out infinite;
+}
+
+/* ── Light mode overrides ── */
+[data-theme="light"] {
+  --color-midnight: oklch(97% 0.01 280);
+  --color-surface: oklch(91% 0.02 280);
+  --color-surface-hover: oklch(86% 0.025 280);
+  --color-surface-active: oklch(82% 0.03 280);
+
+  --color-cream: oklch(18% 0.03 270);
+  --color-cream-muted: oklch(38% 0.04 270);
+
+  --color-lavender: oklch(52% 0.16 280);
+  --color-lavender-soft: oklch(58% 0.13 280);
+  --color-lavender-glow: oklch(72% 0.1 280);
+  --color-lavender-dim: oklch(52% 0.07 280);
+
+  --color-cancel: oklch(55% 0.14 25);
+  --color-cancel-hover: oklch(50% 0.16 25);
+}
+
+/* ── Keyframes ── */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.15);
+  }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

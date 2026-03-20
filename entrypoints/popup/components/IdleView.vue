@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import BaseButton from "./BaseButton.vue";
 
 const emit = defineEmits<{
   start: [durationMs: number];
@@ -8,11 +9,11 @@ const emit = defineEmits<{
 const customMinutes = ref<number | null>(null);
 
 const presets = [
-  { label: "1m", minutes: 1 },
   { label: "15m", minutes: 15 },
   { label: "30m", minutes: 30 },
   { label: "45m", minutes: 45 },
   { label: "1h", minutes: 60 },
+  { label: "2h", minutes: 120 },
 ];
 
 function startPreset(minutes: number) {
@@ -27,26 +28,34 @@ function startCustom() {
 </script>
 
 <template>
-  <div class="space-y-4">
-    <div>
-      <p class="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
+  <div class="space-y-6">
+    <div class="animate-fade-up">
+      <p
+        class="mb-3 text-[0.65rem] font-medium uppercase tracking-[0.2em] text-lavender"
+      >
         Quick start
       </p>
       <div class="grid grid-cols-5 gap-2">
-        <button
-          v-for="preset in presets"
+        <BaseButton
+          v-for="(preset, i) in presets"
           :key="preset.label"
-          class="cursor-pointer rounded-lg bg-gray-100 px-2 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-indigo-100 hover:text-indigo-700 active:bg-indigo-200"
+          :style="{ animationDelay: `${100 + i * 50}ms` }"
+          class="animate-fade-up"
           @click="startPreset(preset.minutes)"
         >
           {{ preset.label }}
-        </button>
+        </BaseButton>
       </div>
     </div>
 
-    <div>
-      <p class="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
-        Custom duration
+    <div
+      class="animate-fade-up"
+      style="animation-delay: 200ms"
+    >
+      <p
+        class="mb-3 text-[0.65rem] font-medium uppercase tracking-[0.2em] text-lavender"
+      >
+        Custom
       </p>
       <form
         class="flex gap-2"
@@ -58,15 +67,20 @@ function startCustom() {
           min="1"
           max="480"
           placeholder="Minutes"
-          class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none transition-colors focus:border-indigo-300 focus:ring-1 focus:ring-indigo-300"
+          class="w-full rounded-full border border-surface-hover bg-surface px-4 py-2.5 text-sm font-light text-cream placeholder:text-lavender outline-none transition-colors duration-200 focus:border-lavender focus:bg-surface-hover"
         >
-        <button
+        <!-- <BaseButton
           type="submit"
-          :disabled="customMinutes == null || customMinutes < 1"
-          class="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 active:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-40"
+          :disabled="customMinutes !== null || customMinutes > 1"
         >
           Start
-        </button>
+        </BaseButton> -->
+        <BaseButton
+          type="submit"
+          class="w-full"
+        >
+          Start
+        </BaseButton>
       </form>
     </div>
   </div>
