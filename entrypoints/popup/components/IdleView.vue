@@ -172,20 +172,30 @@ function startSelected() {
         <div
           class="flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-full py-2"
         >
-          <div class="flex flex-1 w-full items-center justify-center">
-            <input
-              type="number"
-              class="w-[70%] border-none bg-transparent text-center text-cream text-[17px] font-medium tracking-[0.02em] font-[inherit] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none placeholder:text-cream-muted placeholder:text-sm placeholder:font-light placeholder:opacity-50"
-              :class="{
-                'text-white': minutes !== null,
-              }"
-              :value="minutes"
-              min="5"
-              placeholder="min"
-              aria-label="Timer duration in minutes"
-              @input="onMinutesInput"
-              @blur="clampMinutes"
-            >
+          <div
+            class="flex flex-1 w-full items-center justify-center text-center"
+          >
+            <div>
+              <input
+                type="number"
+                class="inline w-min border-none bg-transparent p-0 m-0 text-center text-cream text-[17px] font-medium tracking-[0.02em] font-[inherit] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none placeholder:text-cream-muted placeholder:text-sm placeholder:opacity-50 placeholder:text-[17px] placeholder:font-medium field-sizing-content"
+                :class="{
+                  'text-white': minutes !== null,
+                }"
+                :value="minutes"
+                min="5"
+                placeholder="0"
+                aria-label="Timer duration in minutes"
+                @input="onMinutesInput"
+                @blur="clampMinutes"
+              ><span
+                class="inline text-[17px] font-medium tracking-[0.02em] pointer-events-none"
+                :class="{
+                  'text-white': minutes !== null,
+                  'text-cream-muted opacity-50': minutes === null,
+                }"
+              ><span class="relative top-[-0.05em]">:</span>00</span>
+            </div>
           </div>
           <div
             class="h-0.5 w-full bg-white"
