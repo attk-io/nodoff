@@ -20,17 +20,17 @@ const { theme, toggle } = useTheme();
     <header class="mb-8 flex items-start justify-between animate-fade-in">
       <div>
         <h1
-          class="font-['Fraunces'] text-2xl font-light tracking-tight text-cream"
+          class="font-['Fraunces'] text-2xl font-bold tracking-tight text-cream leading-4"
           style="
             font-variation-settings:
               &quot;SOFT&quot; 100,
               &quot;WONK&quot; 1;
           "
         >
-          nodoff
+          Nodoff
         </h1>
         <p
-          class="mt-1 text-xs font-light tracking-widest uppercase text-lavender-dim"
+          class="mt-1 text-[10px] font-light tracking-widest uppercase text-lavender-dim leading-3"
         >
           Sleep timer
         </p>
