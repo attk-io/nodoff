@@ -232,7 +232,7 @@ const viewBox = `${-viewPad} ${-viewPad} ${viewSize} ${viewSize}`;
 
 /* ── Donut ring ── */
 .donut-sector {
-  fill: var(--mauve-4);
+  fill: var(--mauve-8);
   transition: opacity 0.1s ease-out;
 }
 

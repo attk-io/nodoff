@@ -210,15 +210,17 @@ function startSelected() {
             </div>
           </div>
           <div
-            class="h-px w-[75%] opacity-40 bg-white"
+            class="h-px w-[75%]"
             :class="{
-              'bg-white': minutes !== null,
+              'bg-white opacity-40': minutes !== null,
+              'bg-mauve-1': minutes === null,
             }"
           />
           <button
             class="flex flex-1 w-full cursor-pointer items-center justify-center border-none bg-transparent text-[9px] font-light uppercase tracking-[0.15em] font-[inherit] transition-opacity duration-200 ease-out-quart disabled:cursor-default disabled:opacity-50 not-disabled:hover:opacity-70"
             :class="{
               'text-white': minutes !== null,
+              'text-mauve-11': minutes === null,
             }"
             :disabled="minutes === null || minutes < MIN_MINUTES"
             aria-label="Start timer"
