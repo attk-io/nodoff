@@ -12,18 +12,56 @@ const lastTimerTabIdStorage = storage.defineItem<number | null>(
   { fallback: null },
 );
 
-// --- Badge Management ---
+// --- Icon Management ---
+
+const ICON_PATHS = {
+  16: "/icon-16.png",
+  32: "/icon-32.png",
+} as const;
+
+const ICON_SIZES = [16, 32] as const;
+
+async function drawIconWithDot(
+  size: (typeof ICON_SIZES)[number],
+): Promise<ImageData> {
+  const response = await fetch(browser.runtime.getURL(ICON_PATHS[size]));
+  const blob = await response.blob();
+  const bitmap = await createImageBitmap(blob);
+
+  const canvas = new OffscreenCanvas(size, size);
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(bitmap, 0, 0, size, size);
+
+  // Draw green dot in bottom-right corner
+  const dotRadius = Math.round(size * 0.18);
+  const dotX = size - dotRadius - 1;
+  const dotY = size - dotRadius - 1;
+  ctx.beginPath();
+  ctx.arc(dotX, dotY, dotRadius, 0, Math.PI * 2);
+  ctx.fillStyle = "#55a271";
+  ctx.fill();
+
+  return ctx.getImageData(0, 0, size, size);
+}
 
 async function updateBadge(tabId: number): Promise<void> {
   const timers = await timersStorage.getValue();
   const timer = timers[String(tabId)];
 
   try {
+    await browser.action.setBadgeText({ text: "", tabId });
+
     if (timer && timer.status === "active") {
-      await browser.action.setBadgeText({ text: "●", tabId });
-      await browser.action.setBadgeBackgroundColor({ color: "#22c55e", tabId });
+      const imageData: Record<string, ImageData> = {};
+      for (const size of ICON_SIZES) {
+        imageData[String(size)] = await drawIconWithDot(size);
+      }
+      await browser.action.setIcon({ imageData, tabId });
     } else {
-      await browser.action.setBadgeText({ text: "", tabId });
+      await browser.action.setIcon({
+        path: { "16": "/icon-16.png", "32": "/icon-32.png" },
+        tabId,
+      });
     }
   } catch {
     // Tab may no longer exist
