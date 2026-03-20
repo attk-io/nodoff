@@ -2,7 +2,7 @@
   "name": "nodoff",
   "description": "Sleep timer that pauses audio/video after a configurable timeout",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "wxt",
