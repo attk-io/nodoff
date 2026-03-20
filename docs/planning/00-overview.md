@@ -4,12 +4,12 @@ Nodoff is a greenfield Chrome extension that pauses audio/video after a configur
 
 ## Key Decisions
 
-| Decision        | Choice                                                             | Rationale                                                                          |
-| --------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| Build framework | **WXT** (Vite under the hood)                                      | CRXJS abandoned, vite-plugin-web-extension deprecated. WXT is the successor.       |
-| Timer key       | **tabId**                                                          | Simpler cleanup via `tabs.onRemoved`. Two tabs on same URL get independent timers. |
-| Timer engine    | **chrome.alarms** + stored expiry timestamps                       | MV3 service workers are ephemeral; `setTimeout` is unreliable.                     |
-| Badge           | **Yes** — show remaining minutes for current/last-active timer tab | Updates on tab switch. Shows last timer tab's time if current tab has no timer.    |
+| Decision        | Choice                                               | Rationale                                                                           |
+| --------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Build framework | **WXT** (Vite under the hood)                        | CRXJS abandoned, vite-plugin-web-extension deprecated. WXT is the successor.        |
+| Timer key       | **tabId**                                            | Simpler cleanup via `tabs.onRemoved`. Two tabs on same URL get independent timers.  |
+| Timer engine    | **chrome.alarms** + stored expiry timestamps         | MV3 service workers are ephemeral; `setTimeout` is unreliable.                      |
+| Badge           | **Yes** — colored dot (●) on tabs with active timers | Simple active/not-active indicator. No time text, no animation, no recurring alarm. |
 
 ## Phases
 
