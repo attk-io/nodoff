@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "wxt",
+    "dev:preview": "vite --config vite.preview.config.ts",
     "dev:firefox": "wxt --browser firefox",
     "build": "wxt build",
     "build:firefox": "wxt build --browser firefox",

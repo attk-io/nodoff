@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nodoff – Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1&family=Outfit:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      // Stub WXT auto-imported globals so the popup UI renders outside the extension.
+      window.storage = {
+        defineItem: function () {
+          return {
+            getValue: function () {
+              return Promise.resolve({});
+            },
+            watch: function () {
+              return function () {};
+            },
+          };
+        },
+      };
+      window.browser = {
+        tabs: {
+          query: function () {
+            return Promise.resolve([]);
+          },
+        },
+        runtime: {
+          sendMessage: function () {
+            return Promise.resolve({ state: null });
+          },
+        },
+      };
+    </script>
+    <script type="module" src="/entrypoints/popup/main.ts"></script>
+  </body>
+</html>
