@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useTimer } from "./composables/useTimer";
 import { useTheme } from "./composables/useTheme";
 import IdleView from "./components/IdleView.vue";
 import ActiveView from "./components/ActiveView.vue";
 import ExpiredView from "./components/ExpiredView.vue";
 
-const { status, remainingMs, startTimer, cancelTimer, resetTimer } = useTimer();
+const { status, remainingMs, timerState, startTimer, cancelTimer, resetTimer } =
+  useTimer();
+
+const durationMs = computed(() => timerState.value?.durationMs ?? 0);
 const { theme, toggle } = useTheme();
 </script>
 
@@ -129,6 +133,7 @@ const { theme, toggle } = useTheme();
     <ActiveView
       v-else-if="status === 'active'"
       :remaining-ms="remainingMs"
+      :duration-ms="durationMs"
       @cancel="cancelTimer"
     />
     <ExpiredView

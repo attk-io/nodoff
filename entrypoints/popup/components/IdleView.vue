@@ -21,10 +21,11 @@ const cy = size / 2;
 const outerR = 132;
 const innerR = 60;
 const centerR = 50;
-const gapDeg = 3.5;
+const gapDeg = 0;
+const gapWidth = 5;
 const total = presets.length;
 const sectorDeg = 360 / total;
-const startAngle = -90 - sectorDeg / 2; // first sector centered at 12 o'clock
+const startAngle = -90; // division between first and last sector at 12 o'clock
 
 function degToRad(deg: number) {
   return (deg * Math.PI) / 180;
@@ -62,6 +63,14 @@ function sectorLabelPos(index: number) {
   const midR = (innerR + outerR) / 2;
   return polarToXY(midAngle, midR);
 }
+
+// Divider lines between sectors (uniform-width gaps)
+const dividerLines = Array.from({ length: total }, (_, i) => {
+  const angle = startAngle + i * sectorDeg;
+  const inner = polarToXY(angle, innerR);
+  const outer = polarToXY(angle, outerR);
+  return { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y };
+});
 
 const centerText = computed(() => {
   if (selectedIndex.value === null) return null;
@@ -111,6 +120,18 @@ function startSelected() {
       >
         {{ preset.label }}
       </text>
+
+      <!-- Divider lines (uniform-width gaps) -->
+      <line
+        v-for="(d, i) in dividerLines"
+        :key="`div-${i}`"
+        :x1="d.x1"
+        :y1="d.y1"
+        :x2="d.x2"
+        :y2="d.y2"
+        class="divider"
+        :stroke-width="gapWidth"
+      />
 
       <!-- Center circle -->
       <circle
@@ -213,6 +234,12 @@ function startSelected() {
 
 .sector-label--selected {
   fill: var(--color-midnight);
+}
+
+/* ── Dividers ── */
+.divider {
+  stroke: var(--color-midnight);
+  pointer-events: none;
 }
 
 /* ── Center circle ── */

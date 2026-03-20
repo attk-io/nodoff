@@ -25,6 +25,10 @@ body {
   --color-rose-hover: oklch(75% 0.12 350);
   --color-rose-active: oklch(65% 0.1 350);
 
+  --color-mint: oklch(82.5% 0.1 160);
+  --color-mint-soft: oklch(87% 0.08 160);
+  --color-mint-dim: oklch(68% 0.06 160);
+
   --color-cancel: oklch(65% 0.12 25);
   --color-cancel-hover: oklch(70% 0.14 25);
 
@@ -40,9 +44,9 @@ body {
 
 /* ── Light mode overrides ── */
 [data-theme="light"] {
-  --color-midnight: oklch(97% 0.01 280);
+  --color-midnight: oklch(100% 0 0);
   --color-surface: oklch(91% 0.02 280);
-  --color-surface-hover: oklch(86% 0.025 280);
+  --color-surface-hover: oklch(90.5% 0.015 280);
   --color-surface-active: oklch(82% 0.03 280);
 
   --color-cream: oklch(18% 0.03 270);
@@ -52,6 +56,10 @@ body {
   --color-lavender-soft: oklch(58% 0.13 280);
   --color-lavender-glow: oklch(72% 0.1 280);
   --color-lavender-dim: oklch(52% 0.07 280);
+
+  --color-mint: oklch(82.5% 0.1 160);
+  --color-mint-soft: oklch(87% 0.08 160);
+  --color-mint-dim: oklch(68% 0.06 160);
 
   --color-cancel: oklch(55% 0.14 25);
   --color-cancel-hover: oklch(50% 0.16 25);
