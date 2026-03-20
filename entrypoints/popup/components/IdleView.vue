@@ -1,87 +1,256 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import BaseButton from "./BaseButton.vue";
+import { ref, computed } from "vue";
 
 const emit = defineEmits<{
   start: [durationMs: number];
 }>();
 
-const customMinutes = ref<number | null>(null);
+const selectedIndex = ref<number | null>(null);
 
 const presets = [
   { label: "15m", minutes: 15 },
   { label: "30m", minutes: 30 },
   { label: "45m", minutes: 45 },
-  { label: "1h", minutes: 60 },
-  { label: "2h", minutes: 120 },
+  { label: "1hr", minutes: 60 },
+  { label: "2hr", minutes: 120 },
 ];
 
-function startPreset(minutes: number) {
-  emit("start", minutes * 60 * 1000);
+const size = 280;
+const cx = size / 2;
+const cy = size / 2;
+const outerR = 132;
+const innerR = 60;
+const centerR = 50;
+const gapDeg = 3.5;
+const total = presets.length;
+const sectorDeg = 360 / total;
+const startAngle = -90 - sectorDeg / 2; // first sector centered at 12 o'clock
+
+function degToRad(deg: number) {
+  return (deg * Math.PI) / 180;
 }
 
-function startCustom() {
-  if (customMinutes.value == null || customMinutes.value < 1) return;
-  const clamped = Math.min(customMinutes.value, 480);
-  emit("start", clamped * 60 * 1000);
+function polarToXY(angleDeg: number, r: number) {
+  return {
+    x: cx + r * Math.cos(degToRad(angleDeg)),
+    y: cy + r * Math.sin(degToRad(angleDeg)),
+  };
+}
+
+function sectorPath(index: number): string {
+  const start = startAngle + index * sectorDeg + gapDeg / 2;
+  const end = start + sectorDeg - gapDeg;
+
+  const os = polarToXY(start, outerR);
+  const oe = polarToXY(end, outerR);
+  const is_ = polarToXY(start, innerR);
+  const ie = polarToXY(end, innerR);
+
+  const large = sectorDeg - gapDeg > 180 ? 1 : 0;
+
+  return [
+    `M ${os.x} ${os.y}`,
+    `A ${outerR} ${outerR} 0 ${large} 1 ${oe.x} ${oe.y}`,
+    `L ${ie.x} ${ie.y}`,
+    `A ${innerR} ${innerR} 0 ${large} 0 ${is_.x} ${is_.y}`,
+    "Z",
+  ].join(" ");
+}
+
+function sectorLabelPos(index: number) {
+  const midAngle = startAngle + index * sectorDeg + sectorDeg / 2;
+  const midR = (innerR + outerR) / 2;
+  return polarToXY(midAngle, midR);
+}
+
+const centerText = computed(() => {
+  if (selectedIndex.value === null) return null;
+  const m = presets[selectedIndex.value].minutes;
+  return `${String(m).padStart(2, "0")}:00`;
+});
+
+function selectSector(index: number) {
+  selectedIndex.value = index;
+}
+
+function startSelected() {
+  if (selectedIndex.value === null) return;
+  emit("start", presets[selectedIndex.value].minutes * 60 * 1000);
 }
 </script>
 
 <template>
-  <div class="space-y-6">
-    <div class="animate-fade-up">
-      <p
-        class="mb-3 text-[0.65rem] font-medium uppercase tracking-[0.2em] text-lavender"
-      >
-        Quick start
-      </p>
-      <div class="grid grid-cols-5 gap-2">
-        <BaseButton
-          v-for="(preset, i) in presets"
-          :key="preset.label"
-          :style="{ animationDelay: `${100 + i * 50}ms` }"
-          class="animate-fade-up"
-          @click="startPreset(preset.minutes)"
-        >
-          {{ preset.label }}
-        </BaseButton>
-      </div>
-    </div>
-
-    <div
-      class="animate-fade-up"
-      style="animation-delay: 200ms"
+  <div class="radial-menu animate-fade-up">
+    <svg
+      :viewBox="`0 0 ${size} ${size}`"
+      class="radial-svg w-full"
     >
-      <p
-        class="mb-3 text-[0.65rem] font-medium uppercase tracking-[0.2em] text-lavender"
+      <!-- Sectors -->
+      <path
+        v-for="(preset, i) in presets"
+        :key="preset.label"
+        :d="sectorPath(i)"
+        :class="['sector', { 'sector--selected': selectedIndex === i }]"
+        role="option"
+        :aria-label="`${preset.label} timer`"
+        :aria-selected="selectedIndex === i"
+        @mouseenter="selectSector(i)"
+        @click="selectSector(i)"
+      />
+
+      <!-- Sector labels -->
+      <text
+        v-for="(preset, i) in presets"
+        :key="`label-${preset.label}`"
+        :x="sectorLabelPos(i).x"
+        :y="sectorLabelPos(i).y"
+        class="sector-label"
+        :class="{ 'sector-label--selected': selectedIndex === i }"
+        dominant-baseline="central"
+        text-anchor="middle"
       >
-        Custom
-      </p>
-      <form
-        class="flex gap-2"
-        @submit.prevent="startCustom"
+        {{ preset.label }}
+      </text>
+
+      <!-- Center circle -->
+      <circle
+        :cx="cx"
+        :cy="cy"
+        :r="centerR"
+        :class="[
+          'center-circle',
+          { 'center-circle--active': selectedIndex !== null },
+        ]"
+        :role="selectedIndex !== null ? 'button' : undefined"
+        :aria-label="
+          selectedIndex !== null
+            ? `Start ${presets[selectedIndex].label} timer`
+            : undefined
+        "
+        :style="{ pointerEvents: selectedIndex !== null ? 'auto' : 'none' }"
+        @click="startSelected"
+      />
+
+      <!-- Center text: idle -->
+      <text
+        v-if="selectedIndex === null"
+        :x="cx"
+        :y="cy"
+        class="center-text-idle"
+        dominant-baseline="central"
+        text-anchor="middle"
       >
-        <input
-          v-model.number="customMinutes"
-          type="number"
-          min="1"
-          max="480"
-          placeholder="Minutes"
-          class="w-full rounded-full border border-surface-hover bg-surface px-4 py-2.5 text-sm font-light text-cream placeholder:text-lavender outline-none transition-colors duration-200 focus:border-lavender focus:bg-surface-hover"
+        Select
+      </text>
+
+      <!-- Center text: selected -->
+      <g
+        v-if="selectedIndex !== null"
+        :style="{ pointerEvents: 'none' }"
+      >
+        <text
+          :x="cx"
+          :y="cy - 16"
+          class="center-text-sub"
+          dominant-baseline="central"
+          text-anchor="middle"
         >
-        <!-- <BaseButton
-          type="submit"
-          :disabled="customMinutes !== null || customMinutes > 1"
+          start
+        </text>
+        <text
+          :x="cx"
+          :y="cy + 2"
+          class="center-text-time"
+          dominant-baseline="central"
+          text-anchor="middle"
         >
-          Start
-        </BaseButton> -->
-        <BaseButton
-          type="submit"
-          class="w-full"
+          {{ centerText }}
+        </text>
+        <text
+          :x="cx"
+          :y="cy + 20"
+          class="center-text-sub"
+          dominant-baseline="central"
+          text-anchor="middle"
         >
-          Start
-        </BaseButton>
-      </form>
-    </div>
+          timer
+        </text>
+      </g>
+    </svg>
   </div>
 </template>
+
+<style scoped>
+.radial-menu {
+  display: flex;
+  justify-content: center;
+}
+
+.radial-svg {
+  overflow: visible;
+}
+
+/* ── Sectors ── */
+.sector {
+  fill: var(--color-surface-hover);
+  cursor: pointer;
+  transition: fill 200ms var(--ease-out-quart);
+}
+
+.sector:hover,
+.sector--selected {
+  fill: var(--color-lavender);
+}
+
+/* ── Sector labels ── */
+.sector-label {
+  fill: var(--color-cream-muted);
+  font-size: 15px;
+  font-weight: 300;
+  pointer-events: none;
+  transition: fill 200ms var(--ease-out-quart);
+}
+
+.sector-label--selected {
+  fill: var(--color-midnight);
+}
+
+/* ── Center circle ── */
+.center-circle {
+  fill: var(--color-surface);
+  cursor: default;
+  transition:
+    fill 200ms var(--ease-out-quart),
+    transform 200ms var(--ease-out-quart);
+}
+
+.center-circle--active {
+  fill: var(--color-lavender);
+  cursor: pointer;
+}
+
+/* ── Center text ── */
+.center-text-idle {
+  fill: var(--color-cream-muted);
+  font-size: 14px;
+  font-weight: 300;
+  pointer-events: none;
+}
+
+.center-text-time {
+  fill: var(--color-cream);
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.center-text-sub {
+  fill: var(--color-cream);
+  font-size: 9px;
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  pointer-events: none;
+}
+</style>
