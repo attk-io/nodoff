@@ -37,21 +37,28 @@ const { theme, toggle } = useTheme();
       </div>
 
       <button
-        class="mt-1 flex cursor-pointer items-center gap-1.5 rounded-full bg-surface px-2 py-1 transition-colors duration-200 hover:bg-surface-hover"
+        class="relative mt-1 flex h-7 w-14 cursor-pointer items-center rounded-full bg-surface transition-colors duration-200 hover:bg-surface-hover"
         :aria-label="`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`"
+        role="switch"
+        :aria-checked="theme === 'dark'"
         @click="toggle"
       >
-        <!-- Sun -->
+        <!-- Sliding handle -->
+        <span
+          class="absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white transition-transform duration-300 ease-out-quart"
+          :class="theme === 'dark' ? 'translate-x-7' : 'translate-x-0'"
+        />
+        <!-- Sun icon (left) -->
         <svg
-          width="14"
-          height="14"
+          width="12"
+          height="12"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
           stroke-width="1.5"
           stroke-linecap="round"
           stroke-linejoin="round"
-          class="transition-colors duration-200"
+          class="relative z-10 ml-[0.4375rem] transition-colors duration-200"
           :class="theme === 'light' ? 'text-lavender' : 'text-cream-muted'"
         >
           <circle
@@ -108,17 +115,17 @@ const { theme, toggle } = useTheme();
             y2="4.22"
           />
         </svg>
-        <!-- Moon -->
+        <!-- Moon icon (right) -->
         <svg
-          width="14"
-          height="14"
+          width="12"
+          height="12"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
           stroke-width="1.5"
           stroke-linecap="round"
           stroke-linejoin="round"
-          class="transition-colors duration-200"
+          class="relative z-10 ml-auto mr-[0.4375rem] transition-colors duration-200"
           :class="theme === 'dark' ? 'text-lavender' : 'text-cream-muted'"
         >
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
