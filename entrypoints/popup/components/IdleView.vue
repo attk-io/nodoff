@@ -208,7 +208,7 @@ function startSelected() {
             </div>
           </div>
           <div
-            class="h-0.5 w-full bg-white"
+            class="h-px w-[75%] opacity-40 bg-white"
             :class="{
               'bg-white': minutes !== null,
             }"

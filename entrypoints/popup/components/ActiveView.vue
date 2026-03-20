@@ -34,11 +34,13 @@ const cx = size / 2;
 const cy = size / 2;
 const outerR = 132;
 const innerR = 60;
-const centerR = 50;
-const sectorCount = 5;
-const sectorDeg = 360 / sectorCount;
+const centerR = 57;
+const dividerCount = 5;
+const dividerDeg = 360 / dividerCount;
+const sliceCount = 600;
+const sliceDeg = 360 / sliceCount;
 const startAngle = -90;
-const gapWidth = 5;
+const gapWidth = 3;
 
 function degToRad(deg: number) {
   return (deg * Math.PI) / 180;
@@ -51,15 +53,35 @@ function polarToXY(angleDeg: number, r: number) {
   };
 }
 
+function slicePath(index: number): string {
+  const start = startAngle + index * sliceDeg;
+  const end = start + sliceDeg;
+
+  const os = polarToXY(start, outerR);
+  const oe = polarToXY(end, outerR);
+  const is_ = polarToXY(start, innerR);
+  const ie = polarToXY(end, innerR);
+
+  const large = sliceDeg > 180 ? 1 : 0;
+
+  return [
+    `M ${os.x} ${os.y}`,
+    `A ${outerR} ${outerR} 0 ${large} 1 ${oe.x} ${oe.y}`,
+    `L ${ie.x} ${ie.y}`,
+    `A ${innerR} ${innerR} 0 ${large} 0 ${is_.x} ${is_.y}`,
+    "Z",
+  ].join(" ");
+}
+
 // ── Progress ring ──
-const ringGap = 6;
-const ringWidth = 14;
+const ringGap = 3;
+const ringWidth = 3;
 const ringR = outerR + ringGap + ringWidth / 2;
 const ringOuterEdge = ringR + ringWidth / 2;
 
 // Divider lines between sectors — extend through the progress ring
-const dividerLines = Array.from({ length: sectorCount }, (_, i) => {
-  const angle = startAngle + i * sectorDeg;
+const dividerLines = Array.from({ length: dividerCount }, (_, i) => {
+  const angle = startAngle + i * dividerDeg;
   const inner = polarToXY(angle, innerR);
   const outer = polarToXY(angle, ringOuterEdge);
   return { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y };
@@ -75,8 +97,25 @@ const ringOffset = computed(() => {
   return -(ringCircumference * (1 - progress.value));
 });
 
+// Active slice with trailing glow: moves clockwise, one per second, full rotation = 60s
+const activeSlice = computed(() => {
+  const elapsedTicks = Math.floor((props.durationMs - props.remainingMs) / 100);
+  return elapsedTicks % sliceCount;
+});
+
+const tailLength = 50;
+const minOpacity = 0.33;
+const maxOpacity = 0.66;
+
+function sliceOpacity(index: number): number {
+  const distance = (activeSlice.value - index + sliceCount) % sliceCount;
+  if (distance > tailLength) return minOpacity;
+  const t = 1 - distance / tailLength;
+  return minOpacity + (maxOpacity - minOpacity) * t;
+}
+
 // Expand viewBox to fit the outer progress ring
-const viewPad = 16;
+const viewPad = Math.max(0, Math.ceil(ringOuterEdge - size / 2));
 const viewSize = size + viewPad * 2;
 const viewBox = `${-viewPad} ${-viewPad} ${viewSize} ${viewSize}`;
 </script>
@@ -106,13 +145,13 @@ const viewBox = `${-viewPad} ${-viewPad} ${viewSize} ${viewSize}`;
         :transform="`rotate(-90 ${cx} ${cy})`"
       />
 
-      <!-- Donut ring (single shape) -->
-      <circle
-        :cx="cx"
-        :cy="cy"
-        :r="(outerR + innerR) / 2"
-        class="donut-ring"
-        :stroke-width="outerR - innerR"
+      <!-- Donut slices -->
+      <path
+        v-for="i in sliceCount"
+        :key="`slice-${i}`"
+        :d="slicePath(i - 1)"
+        class="donut-sector"
+        :style="{ opacity: sliceOpacity(i - 1) }"
       />
 
       <!-- Divider lines (simulate gaps) -->
@@ -127,38 +166,41 @@ const viewBox = `${-viewPad} ${-viewPad} ${viewSize} ${viewSize}`;
         :stroke-width="gapWidth"
       />
 
-      <!-- Center circle (stop button) -->
+      <!-- Center circle (visual background) -->
       <circle
         :cx="cx"
         :cy="cy"
         :r="centerR"
-        class="center-circle"
-        role="button"
-        aria-label="Stop timer"
-        @click="emit('cancel')"
+        class="center-circle pointer-events-none"
       />
 
-      <!-- Center text -->
-      <g style="pointer-events: none">
-        <text
-          :x="cx"
-          :y="cy - 14"
-          class="center-text-sub"
-          dominant-baseline="central"
-          text-anchor="middle"
+      <!-- Center interactive content -->
+      <foreignObject
+        :x="cx - centerR"
+        :y="cy - centerR"
+        :width="centerR * 2"
+        :height="centerR * 2"
+      >
+        <div
+          class="flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-full py-2"
         >
-          stop
-        </text>
-        <text
-          :x="cx"
-          :y="cy + 8"
-          class="center-text-time"
-          dominant-baseline="central"
-          text-anchor="middle"
-        >
-          {{ display }}
-        </text>
-      </g>
+          <div
+            class="flex flex-1 w-full items-center justify-center text-center"
+          >
+            <span class="text-white text-[17px] font-medium tracking-[0.02em]">
+              {{ display }}
+            </span>
+          </div>
+          <div class="h-px w-[75%] opacity-40 bg-white" />
+          <button
+            class="flex flex-1 w-full cursor-pointer items-center justify-center border-none bg-transparent text-white text-[9px] font-light uppercase tracking-[0.15em] font-[inherit] transition-opacity duration-200 ease-out-quart hover:opacity-70"
+            aria-label="Stop timer"
+            @click="emit('cancel')"
+          >
+            Stop
+          </button>
+        </div>
+      </foreignObject>
     </svg>
   </div>
 </template>
@@ -177,21 +219,21 @@ const viewBox = `${-viewPad} ${-viewPad} ${viewSize} ${viewSize}`;
 .progress-ring-track {
   fill: none;
   stroke: var(--color-surface-hover);
-  stroke-width: 14;
+  stroke-width: 3;
 }
 
 .progress-ring {
   fill: none;
   stroke: var(--color-mint);
-  stroke-width: 14;
+  stroke-width: 3;
   stroke-linecap: butt;
   transition: stroke-dashoffset 1s linear;
 }
 
 /* ── Donut ring ── */
-.donut-ring {
-  fill: none;
-  stroke: var(--color-surface-hover);
+.donut-sector {
+  fill: var(--color-surface-hover);
+  transition: opacity 0.1s ease-out;
 }
 
 .divider {
@@ -202,27 +244,6 @@ const viewBox = `${-viewPad} ${-viewPad} ${viewSize} ${viewSize}`;
 /* ── Center circle ── */
 .center-circle {
   fill: var(--color-mint);
-  cursor: pointer;
   transition: fill 200ms var(--ease-out-quart);
-}
-
-.center-circle:hover {
-  fill: var(--color-mint-soft);
-}
-
-/* ── Center text ── */
-.center-text-time {
-  fill: var(--color-cream);
-  font-size: 17px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-}
-
-.center-text-sub {
-  fill: var(--color-cream);
-  font-size: 9px;
-  font-weight: 300;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
 }
 </style>

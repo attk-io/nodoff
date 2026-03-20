@@ -25,7 +25,7 @@ body {
   --color-rose-hover: oklch(75% 0.12 350);
   --color-rose-active: oklch(65% 0.1 350);
 
-  --color-mint: oklch(82.5% 0.1 160);
+  --color-mint: #4ba775;
   --color-mint-soft: oklch(87% 0.08 160);
   --color-mint-dim: oklch(68% 0.06 160);
 
@@ -57,7 +57,7 @@ body {
   --color-lavender-glow: oklch(72% 0.1 280);
   --color-lavender-dim: oklch(52% 0.07 280);
 
-  --color-mint: oklch(82.5% 0.1 160);
+  --color-mint: #4ba775;
   --color-mint-soft: oklch(87% 0.08 160);
   --color-mint-dim: oklch(68% 0.06 160);
 

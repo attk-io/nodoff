@@ -90,7 +90,7 @@ export function useTimer() {
   onMounted(() => {
     fetchState();
 
-    intervalId = setInterval(updateRemaining, 1000);
+    intervalId = setInterval(updateRemaining, 100);
 
     try {
       unwatchStorage = timersStorage.watch((timers) => {
