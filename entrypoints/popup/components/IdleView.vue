@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref } from "vue";
 
 const emit = defineEmits<{
   start: [durationMs: number];
 }>();
 
 const selectedIndex = ref<number | null>(null);
+const minutes = ref<number | null>(null);
 
 const presets = [
   { label: "15m", minutes: 15 },
@@ -72,34 +73,50 @@ const dividerLines = Array.from({ length: total }, (_, i) => {
   return { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y };
 });
 
-const centerText = computed(() => {
-  if (selectedIndex.value === null) return null;
-  const m = presets[selectedIndex.value].minutes;
-  return `${String(m).padStart(2, "0")}:00`;
-});
-
 function selectSector(index: number) {
   selectedIndex.value = index;
+  minutes.value = presets[index].minutes;
+}
+
+function onMinutesInput(event: globalThis.Event) {
+  const target = event.target as globalThis.HTMLInputElement;
+  const val = target.valueAsNumber;
+  minutes.value = Number.isNaN(val) ? null : val;
+  // Deselect preset if value doesn't match
+  if (minutes.value !== null) {
+    const match = presets.findIndex((p) => p.minutes === minutes.value);
+    selectedIndex.value = match >= 0 ? match : null;
+  }
+}
+
+function clampMinutes() {
+  if (minutes.value !== null && minutes.value < 5) {
+    minutes.value = 5;
+  }
 }
 
 function startSelected() {
-  if (selectedIndex.value === null) return;
-  emit("start", presets[selectedIndex.value].minutes * 60 * 1000);
+  if (minutes.value === null || minutes.value < 5) return;
+  emit("start", minutes.value * 60 * 1000);
 }
 </script>
 
 <template>
-  <div class="radial-menu animate-fade-up">
+  <div class="flex justify-center animate-fade-up">
     <svg
       :viewBox="`0 0 ${size} ${size}`"
-      class="radial-svg w-full"
+      class="w-full overflow-visible"
     >
       <!-- Sectors -->
       <path
         v-for="(preset, i) in presets"
         :key="preset.label"
         :d="sectorPath(i)"
-        :class="['sector', { 'sector--selected': selectedIndex === i }]"
+        class="cursor-pointer transition-[fill] duration-200 ease-out-quart hover:fill-lavender"
+        :class="{
+          'fill-lavender': selectedIndex === i,
+          'fill-surface-hover': selectedIndex !== i,
+        }"
         role="option"
         :aria-label="`${preset.label} timer`"
         :aria-selected="selectedIndex === i"
@@ -113,8 +130,8 @@ function startSelected() {
         :key="`label-${preset.label}`"
         :x="sectorLabelPos(i).x"
         :y="sectorLabelPos(i).y"
-        class="sector-label"
-        :class="{ 'sector-label--selected': selectedIndex === i }"
+        class="pointer-events-none fill-cream-muted text-[15px] font-light transition-[fill] duration-200 ease-out-quart"
+        :class="{ 'fill-midnight': selectedIndex === i }"
         dominant-baseline="central"
         text-anchor="middle"
       >
@@ -129,155 +146,66 @@ function startSelected() {
         :y1="d.y1"
         :x2="d.x2"
         :y2="d.y2"
-        class="divider"
+        class="pointer-events-none stroke-midnight"
         :stroke-width="gapWidth"
       />
 
-      <!-- Center circle -->
+      <!-- Center circle (visual background) -->
       <circle
         :cx="cx"
         :cy="cy"
         :r="centerR"
-        :class="[
-          'center-circle',
-          { 'center-circle--active': selectedIndex !== null },
-        ]"
-        :role="selectedIndex !== null ? 'button' : undefined"
-        :aria-label="
-          selectedIndex !== null
-            ? `Start ${presets[selectedIndex].label} timer`
-            : undefined
-        "
-        :style="{ pointerEvents: selectedIndex !== null ? 'auto' : 'none' }"
-        @click="startSelected"
+        class="pointer-events-none transition-[fill] duration-200 ease-out-quart"
+        :class="{
+          'fill-lavender': minutes !== null,
+          'fill-surface': minutes === null,
+        }"
       />
 
-      <!-- Center text: idle -->
-      <text
-        v-if="selectedIndex === null"
-        :x="cx"
-        :y="cy"
-        class="center-text-idle"
-        dominant-baseline="central"
-        text-anchor="middle"
+      <!-- Center interactive content -->
+      <foreignObject
+        :x="cx - centerR"
+        :y="cy - centerR"
+        :width="centerR * 2"
+        :height="centerR * 2"
       >
-        Select
-      </text>
-
-      <!-- Center text: selected -->
-      <g
-        v-if="selectedIndex !== null"
-        :style="{ pointerEvents: 'none' }"
-      >
-        <text
-          :x="cx"
-          :y="cy - 16"
-          class="center-text-sub"
-          dominant-baseline="central"
-          text-anchor="middle"
+        <div
+          class="flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-full py-2"
         >
-          start
-        </text>
-        <text
-          :x="cx"
-          :y="cy + 2"
-          class="center-text-time"
-          dominant-baseline="central"
-          text-anchor="middle"
-        >
-          {{ centerText }}
-        </text>
-        <text
-          :x="cx"
-          :y="cy + 20"
-          class="center-text-sub"
-          dominant-baseline="central"
-          text-anchor="middle"
-        >
-          timer
-        </text>
-      </g>
+          <div class="flex flex-1 w-full items-center justify-center">
+            <input
+              type="number"
+              class="w-[70%] border-none bg-transparent text-center text-cream text-[17px] font-medium tracking-[0.02em] font-[inherit] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none placeholder:text-cream-muted placeholder:text-sm placeholder:font-light placeholder:opacity-50"
+              :class="{
+                'text-white': minutes !== null,
+              }"
+              :value="minutes"
+              min="5"
+              placeholder="min"
+              aria-label="Timer duration in minutes"
+              @input="onMinutesInput"
+              @blur="clampMinutes"
+            >
+          </div>
+          <div
+            class="h-0.5 w-full bg-white"
+            :class="{
+              'bg-white': minutes !== null,
+            }"
+          />
+          <button
+            class="flex flex-1 w-full cursor-pointer items-center justify-center border-none bg-transparent text-[9px] font-light uppercase tracking-[0.15em] font-[inherit] transition-opacity duration-200 ease-out-quart disabled:cursor-default disabled:opacity-50 not-disabled:hover:opacity-70"
+            :class="{
+              'text-white': minutes !== null,
+            }"
+            :disabled="minutes === null || minutes < 5"
+            aria-label="Start timer"
+            @click="startSelected"
+          >
+            Start
+          </button>
+        </div>
+      </foreignObject>
     </svg>
   </div>
 </template>
-
-<style scoped>
-.radial-menu {
-  display: flex;
-  justify-content: center;
-}
-
-.radial-svg {
-  overflow: visible;
-}
-
-/* ── Sectors ── */
-.sector {
-  fill: var(--color-surface-hover);
-  cursor: pointer;
-  transition: fill 200ms var(--ease-out-quart);
-}
-
-.sector:hover,
-.sector--selected {
-  fill: var(--color-lavender);
-}
-
-/* ── Sector labels ── */
-.sector-label {
-  fill: var(--color-cream-muted);
-  font-size: 15px;
-  font-weight: 300;
-  pointer-events: none;
-  transition: fill 200ms var(--ease-out-quart);
-}
-
-.sector-label--selected {
-  fill: var(--color-midnight);
-}
-
-/* ── Dividers ── */
-.divider {
-  stroke: var(--color-midnight);
-  pointer-events: none;
-}
-
-/* ── Center circle ── */
-.center-circle {
-  fill: var(--color-surface);
-  cursor: default;
-  transition:
-    fill 200ms var(--ease-out-quart),
-    transform 200ms var(--ease-out-quart);
-}
-
-.center-circle--active {
-  fill: var(--color-lavender);
-  cursor: pointer;
-}
-
-/* ── Center text ── */
-.center-text-idle {
-  fill: var(--color-cream-muted);
-  font-size: 14px;
-  font-weight: 300;
-  pointer-events: none;
-}
-
-.center-text-time {
-  fill: var(--color-cream);
-  font-size: 17px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  pointer-events: none;
-}
-
-.center-text-sub {
-  fill: var(--color-cream);
-  font-size: 9px;
-  font-weight: 300;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  pointer-events: none;
-}
-</style>
