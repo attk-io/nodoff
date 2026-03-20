@@ -7,6 +7,7 @@ const emit = defineEmits<{
 
 const selectedIndex = ref<number | null>(null);
 const minutes = ref<number | null>(null);
+const inputFocused = ref(false);
 
 const presets = [
   { label: "15m", minutes: 15 },
@@ -21,9 +22,9 @@ const cx = size / 2;
 const cy = size / 2;
 const outerR = 132;
 const innerR = 60;
-const centerR = 50;
+const centerR = 57;
 const gapDeg = 0;
-const gapWidth = 5;
+const gapWidth = 3;
 const total = presets.length;
 const sectorDeg = 360 / total;
 const startAngle = -90; // division between first and last sector at 12 o'clock
@@ -74,6 +75,7 @@ const dividerLines = Array.from({ length: total }, (_, i) => {
 });
 
 function selectSector(index: number) {
+  if (inputFocused.value) return;
   selectedIndex.value = index;
   minutes.value = presets[index].minutes;
 }
@@ -112,10 +114,11 @@ function startSelected() {
         v-for="(preset, i) in presets"
         :key="preset.label"
         :d="sectorPath(i)"
-        class="cursor-pointer transition-[fill] duration-200 ease-out-quart hover:fill-lavender"
+        class="cursor-pointer transition-[fill,opacity] duration-200 ease-out-quart hover:fill-lavender"
         :class="{
           'fill-lavender': selectedIndex === i,
           'fill-surface-hover': selectedIndex !== i,
+          'opacity-40': inputFocused,
         }"
         role="option"
         :aria-label="`${preset.label} timer`"
@@ -130,8 +133,11 @@ function startSelected() {
         :key="`label-${preset.label}`"
         :x="sectorLabelPos(i).x"
         :y="sectorLabelPos(i).y"
-        class="pointer-events-none fill-cream-muted text-[15px] font-light transition-[fill] duration-200 ease-out-quart"
-        :class="{ 'fill-midnight': selectedIndex === i }"
+        class="pointer-events-none fill-cream-muted text-[15px] font-light transition-[fill,opacity] duration-200 ease-out-quart"
+        :class="{
+          'fill-midnight': selectedIndex === i,
+          'opacity-40': inputFocused,
+        }"
         dominant-baseline="central"
         text-anchor="middle"
       >
@@ -187,7 +193,11 @@ function startSelected() {
                 placeholder="0"
                 aria-label="Timer duration in minutes"
                 @input="onMinutesInput"
-                @blur="clampMinutes"
+                @focus="inputFocused = true"
+                @blur="
+                  inputFocused = false;
+                  clampMinutes();
+                "
               ><span
                 class="inline text-[17px] font-medium tracking-[0.02em] pointer-events-none"
                 :class="{
