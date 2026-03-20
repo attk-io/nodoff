@@ -126,7 +126,7 @@ const viewBox = `${-viewPad} ${-viewPad} ${viewSize} ${viewSize}`;
       :viewBox="viewBox"
       class="radial-svg w-full"
     >
-      <!-- Progress ring: background track (grey) -->
+      <!-- Progress ring: background track -->
       <circle
         :cx="cx"
         :cy="cy"
@@ -134,7 +134,7 @@ const viewBox = `${-viewPad} ${-viewPad} ${viewSize} ${viewSize}`;
         class="progress-ring-track"
       />
 
-      <!-- Progress ring: active (mint) -->
+      <!-- Progress ring: active (green) -->
       <circle
         :cx="cx"
         :cy="cy"
@@ -218,13 +218,13 @@ const viewBox = `${-viewPad} ${-viewPad} ${viewSize} ${viewSize}`;
 /* ── Progress ring ── */
 .progress-ring-track {
   fill: none;
-  stroke: var(--color-surface-hover);
+  stroke: var(--mauve-4);
   stroke-width: 3;
 }
 
 .progress-ring {
   fill: none;
-  stroke: var(--color-mint);
+  stroke: var(--green-9);
   stroke-width: 3;
   stroke-linecap: butt;
   transition: stroke-dashoffset 1s linear;
@@ -232,18 +232,18 @@ const viewBox = `${-viewPad} ${-viewPad} ${viewSize} ${viewSize}`;
 
 /* ── Donut ring ── */
 .donut-sector {
-  fill: var(--color-surface-hover);
+  fill: var(--mauve-4);
   transition: opacity 0.1s ease-out;
 }
 
 .divider {
-  stroke: var(--color-midnight);
+  stroke: var(--mauve-1);
   pointer-events: none;
 }
 
 /* ── Center circle ── */
 .center-circle {
-  fill: var(--color-mint);
+  fill: var(--green-9);
   transition: fill 200ms var(--ease-out-quart);
 }
 </style>

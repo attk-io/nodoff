@@ -10,7 +10,7 @@ const emit = defineEmits<{
   <div class="flex flex-col items-center space-y-6">
     <div class="animate-fade-up text-center">
       <p
-        class="font-['Fraunces'] text-xl font-light text-cream"
+        class="font-['Fraunces'] text-xl font-light text-mauve-12"
         style="
           font-variation-settings:
             &quot;SOFT&quot; 100,
@@ -19,7 +19,7 @@ const emit = defineEmits<{
       >
         Sweet dreams
       </p>
-      <p class="mt-1 text-xs font-light text-lavender-dim">
+      <p class="mt-1 text-xs font-light text-violet-11">
         Your timer has ended
       </p>
     </div>

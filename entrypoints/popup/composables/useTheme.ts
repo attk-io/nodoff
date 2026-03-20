@@ -8,7 +8,14 @@ export function useTheme() {
   const theme = ref<Theme>("dark");
 
   function apply(t: Theme) {
-    document.documentElement.setAttribute("data-theme", t);
+    const el = document.documentElement;
+    if (t === "dark") {
+      el.classList.add("dark");
+      el.classList.remove("light");
+    } else {
+      el.classList.add("light");
+      el.classList.remove("dark");
+    }
   }
 
   function toggle() {

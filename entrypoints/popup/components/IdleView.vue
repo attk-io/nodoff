@@ -5,6 +5,8 @@ const emit = defineEmits<{
   start: [durationMs: number];
 }>();
 
+const MIN_MINUTES = 1;
+
 const selectedIndex = ref<number | null>(null);
 const minutes = ref<number | null>(null);
 const inputFocused = ref(false);
@@ -92,13 +94,13 @@ function onMinutesInput(event: globalThis.Event) {
 }
 
 function clampMinutes() {
-  if (minutes.value !== null && minutes.value < 5) {
-    minutes.value = 5;
+  if (minutes.value !== null && minutes.value < MIN_MINUTES) {
+    minutes.value = MIN_MINUTES;
   }
 }
 
 function startSelected() {
-  if (minutes.value === null || minutes.value < 5) return;
+  if (minutes.value === null || minutes.value < MIN_MINUTES) return;
   emit("start", minutes.value * 60 * 1000);
 }
 </script>
@@ -114,10 +116,10 @@ function startSelected() {
         v-for="(preset, i) in presets"
         :key="preset.label"
         :d="sectorPath(i)"
-        class="cursor-pointer transition-[fill,opacity] duration-200 ease-out-quart hover:fill-lavender"
+        class="cursor-pointer transition-[fill,opacity] duration-200 ease-out-quart hover:fill-violet-9"
         :class="{
-          'fill-lavender': selectedIndex === i,
-          'fill-surface-hover': selectedIndex !== i,
+          'fill-violet-9': selectedIndex === i,
+          'fill-mauve-4': selectedIndex !== i,
           'opacity-40': inputFocused,
         }"
         role="option"
@@ -133,9 +135,9 @@ function startSelected() {
         :key="`label-${preset.label}`"
         :x="sectorLabelPos(i).x"
         :y="sectorLabelPos(i).y"
-        class="pointer-events-none fill-cream-muted text-[15px] font-light transition-[fill,opacity] duration-200 ease-out-quart"
+        class="pointer-events-none fill-mauve-11 text-[15px] font-light transition-[fill,opacity] duration-200 ease-out-quart"
         :class="{
-          'fill-midnight': selectedIndex === i,
+          'fill-white': selectedIndex === i,
           'opacity-40': inputFocused,
         }"
         dominant-baseline="central"
@@ -152,7 +154,7 @@ function startSelected() {
         :y1="d.y1"
         :x2="d.x2"
         :y2="d.y2"
-        class="pointer-events-none stroke-midnight"
+        class="pointer-events-none stroke-mauve-1"
         :stroke-width="gapWidth"
       />
 
@@ -163,8 +165,8 @@ function startSelected() {
         :r="centerR"
         class="pointer-events-none transition-[fill] duration-200 ease-out-quart"
         :class="{
-          'fill-lavender': minutes !== null,
-          'fill-surface': minutes === null,
+          'fill-violet-9': minutes !== null,
+          'fill-mauve-3': minutes === null,
         }"
       />
 
@@ -184,12 +186,12 @@ function startSelected() {
             <div>
               <input
                 type="number"
-                class="inline w-min border-none bg-transparent p-0 m-0 text-center text-cream text-[17px] font-medium tracking-[0.02em] font-[inherit] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none placeholder:text-cream-muted placeholder:text-sm placeholder:opacity-50 placeholder:text-[17px] placeholder:font-medium field-sizing-content"
+                class="inline w-min border-none bg-transparent p-0 m-0 text-center text-mauve-12 text-[17px] font-medium tracking-[0.02em] font-[inherit] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none placeholder:text-mauve-11 placeholder:text-sm placeholder:opacity-50 placeholder:text-[17px] placeholder:font-medium field-sizing-content"
                 :class="{
                   'text-white': minutes !== null,
                 }"
                 :value="minutes"
-                min="5"
+                :min="MIN_MINUTES"
                 placeholder="0"
                 aria-label="Timer duration in minutes"
                 @input="onMinutesInput"
@@ -202,7 +204,7 @@ function startSelected() {
                 class="inline text-[17px] font-medium tracking-[0.02em] pointer-events-none"
                 :class="{
                   'text-white': minutes !== null,
-                  'text-cream-muted opacity-50': minutes === null,
+                  'text-mauve-11 opacity-50': minutes === null,
                 }"
               ><span class="relative top-[-0.05em]">:</span>00</span>
             </div>
@@ -218,7 +220,7 @@ function startSelected() {
             :class="{
               'text-white': minutes !== null,
             }"
-            :disabled="minutes === null || minutes < 5"
+            :disabled="minutes === null || minutes < MIN_MINUTES"
             aria-label="Start timer"
             @click="startSelected"
           >

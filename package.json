@@ -29,6 +29,7 @@
     ]
   },
   "dependencies": {
+    "@radix-ui/colors": "^3.0.0",
     "@wxt-dev/module-vue": "^1.0.3",
     "vue": "^3.5.30",
     "wxt": "^0.20.20"
